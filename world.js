@@ -88,7 +88,7 @@ this.WORLD = (function ()
 		},
 
 
-		getStatus = function ()
+		getDescription = function ()
 		{
 			return JSON.stringify(grids[i_step].map(function (array)
 			{
@@ -110,8 +110,7 @@ this.WORLD = (function ()
 	return {
 		init: init,
 		update: update,
-		getStatus: getStatus,
-		getGrids: function () {return grids;},
+		getDescription: getDescription,
 		setCell: setCell
 
 	};
