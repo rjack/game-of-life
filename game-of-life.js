@@ -1,21 +1,46 @@
 this.GAMEOFLIFE = (function ()
 {
-	var canvas = document.getElementById("canvas"),
+	var grid_width = 50,
+		grid_heigth = 50,
+
+		canvas = document.getElementById("canvas"),
+
 		patterns = {
 			slider: [[1, 0], [2, 1], [2, 2], [1, 2], [0, 2]]
+		},
+
+		init = function ()
+		{
+			var i, j;
+
+			WORLD.init({ grid: { width: grid_heigth, height: grid_width }});
+
+			// Randomly spawn living cells
+			for (i = 0; i < grid_width; i++) {
+				for (j = 0; j < grid_heigth; j++) {
+					WORLD.setCell(i, j, Math.random() >= 0.5 ? true : false);
+				}
+			}
+
+			GRAPHICS.init({ canvas: canvas, cell: {width: 10, height: 10 }});
+			GRAPHICS.update(WORLD.getDescription());
+		},
+
+		start = function ()
+		{
+			setInterval(function ()
+			{
+				WORLD.update();
+				GRAPHICS.update(WORLD.getDescription());
+			}, 1000 / 10);
 		};
 
-	WORLD.init({ grid: { width: 100, height: 100 }});
-	for (i_coord = 0; i_coord < patterns.slider.length; i_coord++) {
-		WORLD.setCell(patterns.slider[i_coord][0], patterns.slider[i_coord][1], true);
-	}
-
-	GRAPHICS.init({ canvas: canvas, cell: {width: 10, height: 10 }});
-	GRAPHICS.update(WORLD.getDescription());
-
-	setInterval(function ()
-	{
-		WORLD.update();
-		GRAPHICS.update(WORLD.getDescription());
-	}, 1000/4);
+	// GAMEOFLIFE's public interface
+	return {
+		init: init,
+		start: start
+	};
 }());
+
+GAMEOFLIFE.init();
+GAMEOFLIFE.start();
