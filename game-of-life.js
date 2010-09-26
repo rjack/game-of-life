@@ -1,19 +1,69 @@
 this.GAMEOFLIFE = (function ()
 {
-	var grid_width = 50,
-		grid_heigth = 50,
+	var grid_width = 250,
+		grid_heigth = 250,
+
+		ui = (function ()
+		{
+			var i,
+				elems = {
+					draw: null,
+					profile: null,
+					"start-stop": null
+				};
+			for (i in elems) {
+				elems[i] = document.getElementById(i);
+			}
+			return elems;
+		}()),
+
+		interval,
+
+		ui = (function ()
+		{
+			var i,
+				elems = {
+					draw: null,
+					profile: null,
+					"start-stop": null
+				};
+			for (i in elems) {
+				elems[i] = document.getElementById(i);
+			}
+			return elems;
+		}()),
+
+		interval,
 
 		canvas = document.getElementById("canvas"),
 
-		patterns = {
-			slider: [[1, 0], [2, 1], [2, 2], [1, 2], [0, 2]]
+
+		start = function ()
+		{
+			interval = setInterval(function ()
+			{
+				WORLD.update();
+				GRAPHICS.update(WORLD.getDescription());
+			}, 1000 / 1);
+		},
+
+
+		stop = function ()
+		{
+			clearInterval(interval);
+			interval = null;
 		},
 
 		init = function ()
 		{
 			var i, j;
 
+			interval = null;
+
 			WORLD.init({ grid: { width: grid_heigth, height: grid_width }});
+
+			//PHYSICS.init();
+			GRAPHICS.init({ canvas: canvas, cell: {width: 2, height: 2}});
 
 			// Randomly spawn living cells
 			for (i = 0; i < grid_width; i++) {
@@ -21,26 +71,31 @@ this.GAMEOFLIFE = (function ()
 					WORLD.setCell(i, j, Math.random() >= 0.5 ? true : false);
 				}
 			}
-
-			GRAPHICS.init({ canvas: canvas, cell: {width: 10, height: 10 }});
+			//WORLD.update(PHYSICS.next(WORLD.getDescription()));
+			WORLD.update();
 			GRAPHICS.update(WORLD.getDescription());
-		},
 
-		start = function ()
-		{
-			setInterval(function ()
+
+			// User input
+			ui["start-stop"].addEventListener("click", function (ev)
 			{
-				WORLD.update();
-				GRAPHICS.update(WORLD.getDescription());
-			}, 1000 / 10);
+				if (interval) {
+					if (ui.profile.checked) {
+						console.profileEnd();
+					}
+					ui.profile.disabled = false;
+					stop();
+					ev.target.textContent = "start";
+				} else {
+					if (ui.profile.checked) {
+						console.profile();
+					}
+					start();
+					ui.profile.disabled = true;
+					ev.target.textContent = "stop";
+				}
+			});
 		};
 
-	// GAMEOFLIFE's public interface
-	return {
-		init: init,
-		start: start
-	};
+	init();
 }());
-
-GAMEOFLIFE.init();
-GAMEOFLIFE.start();
