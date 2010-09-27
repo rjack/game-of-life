@@ -66,15 +66,9 @@ this.GAMEOFLIFE = (function ()
 
 			WORLD.init({ grid: { width: grid_heigth, height: grid_width }});
 
-			//PHYSICS.init();
+			PHYSICS.init(WORLD, null);
 			GRAPHICS.init({ canvas: canvas, cell: {width: 2, height: 2}});
 
-			// Randomly spawn living cells
-			for (i = 0; i < grid_width; i++) {
-				for (j = 0; j < grid_heigth; j++) {
-					WORLD.setCell(i, j, Math.random() >= 0.5 ? true : false);
-				}
-			}
 			//WORLD.update(PHYSICS.next(WORLD.getDescription()));
 			WORLD.update();
 			GRAPHICS.update(WORLD.getDescription());
