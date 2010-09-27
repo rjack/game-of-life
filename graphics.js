@@ -29,7 +29,7 @@ this.GRAPHICS = (function ()
 
 			for (i_width = 0; i_width < world.getWidth(); i_width++) {
 				for (i_height = 0; i_height < world.getHeight(); i_height++) {
-					if (world.getCell(i_width, i_height)) {
+					if (world.getCell(i_width, i_height).alive) {
 						ctx.fillStyle = "black";
 					} else {
 						ctx.fillStyle = "white";

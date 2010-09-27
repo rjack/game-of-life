@@ -46,7 +46,7 @@ this.GAMEOFLIFE = (function ()
 		{
 			interval = setInterval(function ()
 			{
-				WORLD.update();
+				WORLD.setGrid(PHYSICS.next(WORLD));
 				GRAPHICS.update(WORLD);
 			}, 1000 / 1);
 		},
@@ -69,8 +69,7 @@ this.GAMEOFLIFE = (function ()
 			PHYSICS.init(WORLD, null);
 			GRAPHICS.init({ canvas: canvas, cell: {width: 2, height: 2}});
 
-			//WORLD.update(PHYSICS.next(WORLD.getDescription()));
-			WORLD.update();
+			WORLD.setGrid(PHYSICS.next(WORLD));
 			GRAPHICS.update(WORLD);
 
 
