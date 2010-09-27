@@ -19,6 +19,11 @@ this.GAMEOFLIFE = (function ()
 
 		interval,
 
+		isRunning = function ()
+		{
+			return !!interval;
+		},
+
 		ui = (function ()
 		{
 			var i,
@@ -33,7 +38,6 @@ this.GAMEOFLIFE = (function ()
 			return elems;
 		}()),
 
-		interval,
 
 		canvas = document.getElementById("canvas"),
 
@@ -79,7 +83,7 @@ this.GAMEOFLIFE = (function ()
 			// User input
 			ui["start-stop"].addEventListener("click", function (ev)
 			{
-				if (interval) {
+				if (isRunning()) {
 					if (ui.profile.checked) {
 						console.profileEnd();
 					}
