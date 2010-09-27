@@ -23,15 +23,13 @@ this.GRAPHICS = (function ()
 		},
 
 
-		update = function (worldDescription)
+		update = function (world)
 		{
-			var i_width, i_height, grid;
+			var i_width, i_height;
 
-			grid = JSON.parse(worldDescription);
-
-			for (i_width = 0; i_width < grid.length; i_width++) {
-				for (i_height = 0; i_height < grid[i_width].length; i_height++) {
-					if (grid[i_width][i_height]) {
+			for (i_width = 0; i_width < world.getWidth(); i_width++) {
+				for (i_height = 0; i_height < world.getHeight(); i_height++) {
+					if (world.getCell(i_width, i_height)) {
 						ctx.fillStyle = "black";
 					} else {
 						ctx.fillStyle = "white";

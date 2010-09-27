@@ -47,7 +47,7 @@ this.GAMEOFLIFE = (function ()
 			interval = setInterval(function ()
 			{
 				WORLD.update();
-				GRAPHICS.update(WORLD.getDescription());
+				GRAPHICS.update(WORLD);
 			}, 1000 / 1);
 		},
 
@@ -71,7 +71,7 @@ this.GAMEOFLIFE = (function ()
 
 			//WORLD.update(PHYSICS.next(WORLD.getDescription()));
 			WORLD.update();
-			GRAPHICS.update(WORLD.getDescription());
+			GRAPHICS.update(WORLD);
 
 
 			// User input

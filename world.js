@@ -88,15 +88,9 @@ this.WORLD = (function ()
 		},
 
 
-		getDescription = function ()
+		getCell = function (i, j)
 		{
-			return JSON.stringify(grids[i_step].map(function (array)
-			{
-				return array.map(function (cell)
-				{
-					return cell.alive;
-				});
-			}));
+			return grids[i_step][i][j].alive;
 		},
 
 
@@ -110,7 +104,7 @@ this.WORLD = (function ()
 	return {
 		init: init,
 		update: update,
-		getDescription: getDescription,
+		getCell: getCell,
 		setCell: setCell,
 		getWidth: function () { return width; },
 		getHeight: function () { return height; }
