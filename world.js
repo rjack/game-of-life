@@ -111,7 +111,8 @@ this.WORLD = (function ()
 		init: init,
 		update: update,
 		getDescription: getDescription,
-		setCell: setCell
-
+		setCell: setCell,
+		getWidth: function () { return width; },
+		getHeight: function () { return height; }
 	};
 }());
