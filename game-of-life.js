@@ -1,98 +1,64 @@
-this.GAMEOFLIFE = (function ()
+this.GOF = (function (graphics)
 {
-	var grid_width = 250,
-		grid_heigth = 250,
+	var iface = {},
+		phy = new Worker("physics.js"),
 
-		ui = (function ()
+		_createGrid = function (width, height)
 		{
-			var i,
-				elems = {
-					draw: null,
-					profile: null,
-					"start-stop": null
-				};
-			for (i in elems) {
-				elems[i] = document.getElementById(i);
-			}
-			return elems;
-		}()),
-
-		interval,
-
-		isRunning = function ()
-		{
-			return !!interval;
-		},
-
-		ui = (function ()
-		{
-			var i,
-				elems = {
-					draw: null,
-					profile: null,
-					"start-stop": null
-				};
-			for (i in elems) {
-				elems[i] = document.getElementById(i);
-			}
-			return elems;
-		}()),
-
-
-		canvas = document.getElementById("canvas"),
-
-
-		start = function ()
-		{
-			interval = setInterval(function ()
-			{
-				WORLD.setGrid(PHYSICS.next(WORLD));
-				GRAPHICS.update(WORLD);
-			}, 1000 / 1);
-		},
-
-
-		stop = function ()
-		{
-			clearInterval(interval);
-			interval = null;
-		},
-
-		init = function ()
-		{
-			var i, j;
-
-			interval = null;
-
-			WORLD.init({ grid: { width: grid_heigth, height: grid_width }});
-
-			PHYSICS.init(WORLD, null);
-			GRAPHICS.init({ canvas: canvas, cell: {width: 2, height: 2}});
-
-			WORLD.setGrid(PHYSICS.next(WORLD));
-			GRAPHICS.update(WORLD);
-
-
-			// User input
-			ui["start-stop"].addEventListener("click", function (ev)
-			{
-				if (isRunning()) {
-					if (ui.profile.checked) {
-						console.profileEnd();
-					}
-					ui.profile.disabled = false;
-					stop();
-					ev.target.textContent = "start";
-				} else {
-					if (ui.profile.checked) {
-						console.profile();
-					}
-					start();
-					ui.profile.disabled = true;
-					ev.target.textContent = "stop";
+			var i, j, grid = [];
+			for (i = 0; i < width; i++) {
+				grid[i] = [];
+				for (j = 0; j < height; j++) {
+					grid[i][j] = (Math.random() >= 0.5)
 				}
-			});
+			}
+			return grid;
 		};
 
-	init();
-}());
+	iface.init = function (grid_width, grid_height, cell_width, cell_height)
+	{
+		console.profile();
+		// init physics worker
+		phy.postMessage(JSON.stringify(["init", grid_width, grid_height, _createGrid(grid_width, grid_height)]));
+
+		// init graphics module
+		graphics.init({
+			canvas: {
+				element: document.getElementById("canvas"),
+				width: grid_width * cell_width,
+				height: grid_height * cell_height
+			},
+			cell: {
+				width: cell_width,
+				height: cell_height
+			}
+		});
+	};
+
+	iface.start = function (interval, nr_thread)
+	{
+	};
+
+
+	phy.onmessage = function (ev)
+	{
+		var msg = JSON.parse(ev.data);
+
+		console.log(msg);
+
+		if (msg.title === "ready") {
+			graphics.update(msg.content.grid);
+			console.profileEnd();
+		} else if (msg.title === "start") {
+			phy.postMessage(JSON.stringify(["start", onstep, nr_thread]));
+		} else if (msg.title === "step") {
+			// TODO
+		} else if (msg.title === "stop") {
+			// TODO
+		} else if (msg.title === "log") {
+			console.log(msg.content);
+		}
+	};
+
+	return iface;
+}(GRAPHICS));

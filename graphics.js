@@ -16,7 +16,9 @@ this.GRAPHICS = (function ()
 
 		init = function (config)
 		{
-			cnv = config.canvas;
+			cnv = config.canvas.element;
+			cnv.width = config.canvas.width;
+			cnv.height = config.canvas.height;
 			ctx = cnv.getContext("2d");
 			cell.width = config.cell.width;
 			cell.height = config.cell.height;
@@ -24,14 +26,14 @@ this.GRAPHICS = (function ()
 		},
 
 
-		update = function (world)
+		update = function (grid)
 		{
 			var i_width, i_height;
 
 			ctx.clearRect(0, 0, cnv.width, cnv.height);
-			for (i_width = 0; i_width < world.getWidth(); i_width++) {
-				for (i_height = 0; i_height < world.getHeight(); i_height++) {
-					if (world.getCell(i_width, i_height).alive) {
+			for (i_width = 0; i_width < grid.length; i_width++) {
+				for (i_height = 0; i_height < grid[i_width].length; i_height++) {
+					if (grid[i_width][i_height]) {
 						ctx.fillRect(i_width * cell.width, i_height * cell.height, cell.width, cell.height);
 					}
 				}

@@ -1,65 +1,86 @@
-this.PHYSICS = (function ()
+var grids,
+	current,
+	width, height,
+	iface = {};
+
+
+/*
+ * Allocates the grid.
+ */
+iface.init = function (grid_width, grid_height, matrix)
 {
-	var grid,
+	var i, j, k;
 
+	width = grid_width;
+	height = grid_height;
 
-		init = function (world, config)
-		{
-			var i, j;
+	grids = [[], []];
 
-			// Randomly spawn living cells
-			// FIXME: does not belongs here!
-			for (i = 0; i < world.getWidth(); i++) {
-				for (j = 0; j < world.getHeight(); j++) {
-					world.setCell(i, j, Math.random() >= 0.5 ? true : false);
-				}
+	for (i = 0; i < grids.length; i++) {
+		for (j = 0; j < grid_width; j++) {
+			grids[i][j] = [];
+			for (k = 0; k < grid_height; k++) {
+				grids[i][j][k] = matrix[j][k];
 			}
-		},
+		}
+	}
 
+	current = 0;
 
-		next = function (world)
-		{
-			var i, j, i_off,
-				current_cell, future_cell, neighb_cell,
-				nr_neighbs,
-				neighbs_offsets = [
-					[-1, -1], [+0, -1], [+1, -1],
-					[-1, +0],           [+1, +0],
-					[-1, +1], [+0, +1], [+1, +1]
-				];
-
-			grid = [];
-			for (i = 0; i < world.getWidth(); i++) {
-				grid[i] = [];
-				for (j = 0; j < world.getHeight(); j++) {
-					nr_neighbs = 0;
-					current_cell = world.getCell(i, j);
-					for (i_off = 0; i_off < neighbs_offsets.length; i_off++) {
-						neighb_cell = world.getCell(i, j, neighbs_offsets[i_off][0], neighbs_offsets[i_off][1]);
-						nr_neighbs += Number(neighb_cell.alive);
-					}
-					if (current_cell.alive) {
-						if (nr_neighbs < 2 || nr_neighbs > 3) {
-							grid[i][j] = world.createCell(false);
-						} else {
-							grid[i][j] = world.createCell(true);
-						}
-					} else {
-						if (nr_neighbs === 3) {
-							grid[i][j] = world.createCell(true);
-						} else {
-							grid[i][j] = world.createCell(false);
-						}
-					}
-				}
-			}
-			return grid;
-		};
-
-
-	// PHYSICS' public interface.
 	return {
-		init: init,
-		next: next
+		title: "ready",
+		content: {
+			grid: grids[current]
+		}
 	};
-}());
+};
+
+
+/*
+ * start: starts the simulation.
+ *
+ * - interval: time in milliseconds between steps. If it's zero simulation
+ *   runs in a tight loop.
+ *
+ * - onstep: callback function, called on each step.
+ *
+ * - nr_thread: number of additional web workers to use. If it's zero, use
+ *   just this one.
+ */
+iface.start = function (interval, onstep, nr_thread)
+{
+	postMessage(JSON.stringify({title: "started", content: null}));
+};
+
+
+/*
+ * stop: stops the simulation.
+ */
+iface.stop = function ()
+{
+};
+
+
+/*
+ * step: advances the simulation just one step.
+ */
+iface.step = function ()
+{
+};
+
+
+onmessage = function (ev)
+{
+	var request = JSON.parse(ev.data),
+		result;
+
+	if (request[0] in iface) {
+		result = iface[request[0]].apply(this, request.slice(1));
+	} else {
+		throw msg.fn + " not in interface.";
+	}
+
+	if (typeof result !== "undefined") {
+		postMessage(JSON.stringify(result));
+	}
+};
