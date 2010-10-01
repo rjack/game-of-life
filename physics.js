@@ -1,7 +1,22 @@
 var grids,
 	current,
 	width, height,
-	iface = {};
+	running,
+	iface = {},
+
+	_step = function (notify)
+	{
+		if (notify) {
+			postMessage(JSON.stringify({title: "stepped", content: {grid: grids[current]}}));
+		}
+	},
+
+	_loop = function (notify)
+	{
+		while (running) {
+			_step(notify);
+		}
+	};
 
 
 /*
@@ -26,6 +41,7 @@ iface.init = function (grid_width, grid_height, matrix)
 	}
 
 	current = 0;
+	running = false;
 
 	return {
 		title: "ready",
@@ -42,14 +58,38 @@ iface.init = function (grid_width, grid_height, matrix)
  * - interval: time in milliseconds between steps. If it's zero simulation
  *   runs in a tight loop.
  *
- * - onstep: callback function, called on each step.
+ * - notify: notify steps
  *
  * - nr_thread: number of additional web workers to use. If it's zero, use
  *   just this one.
  */
-iface.start = function (interval, onstep, nr_thread)
+iface.start = function (interval, notify, nr_thread)
 {
+	interval = Number(interval);
+	nr_thread = Number(nr_thread);
+
+	// NaN
+	if (interval !== interval) {
+		throw "interval is not a number"
+	}
+	if (nr_thread !== nr_thread) {
+		throw "nr_thread is not a number"
+	}
+
+	// Tell we're going...
 	postMessage(JSON.stringify({title: "started", content: null}));
+
+	// ... and go!
+	if (interval === 0) {
+		running = true;
+		_loop(notify)
+	} else {
+		running = setInterval(function()
+		{
+			_step(notify);
+		}, 1000 / interval);
+	}
+
 };
 
 
@@ -58,6 +98,10 @@ iface.start = function (interval, onstep, nr_thread)
  */
 iface.stop = function ()
 {
+	if (typeof running === "number") {
+		clearInterval(running);
+	}
+	running = false;
 };
 
 

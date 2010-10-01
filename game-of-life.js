@@ -35,8 +35,15 @@ this.GOF = (function (graphics)
 		});
 	};
 
-	iface.start = function (interval, nr_thread)
+	iface.start = function (interval, onstep, nr_thread)
 	{
+		phy.postMessage(JSON.stringify(["start", interval, onstep, nr_thread]));
+	};
+
+
+	iface.stop = function ()
+	{
+		phy.postMessage(JSON.stringify(["stop"]));
 	};
 
 
