@@ -9,7 +9,7 @@ this.GOF = (function (graphics)
 			for (i = 0; i < width; i++) {
 				grid[i] = [];
 				for (j = 0; j < height; j++) {
-					grid[i][j] = (Math.random() >= 0.5)
+					grid[i][j] = (Math.random() >= 0.5);
 				}
 			}
 			return grid;
