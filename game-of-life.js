@@ -1,7 +1,17 @@
 this.GOF = (function (graphics)
 {
 	var iface = {},
+		nr_steps,
 		phy = new Worker("physics.js"),
+
+		ui = (function (elems)
+		{
+			var i, ui = {};
+			for (i = 0; i < elems.length; i++) {
+				ui[elems[i]] = document.getElementById(elems[i]);
+			}
+			return ui;
+		}(["nr_steps"])),
 
 		_createGrid = function (width, height)
 		{
@@ -17,7 +27,9 @@ this.GOF = (function (graphics)
 
 	iface.init = function (grid_width, grid_height, cell_width, cell_height)
 	{
-		console.profile();
+		nr_steps = 0;
+		ui.nr_steps.textContent = nr_steps;
+
 		// init physics worker
 		phy.postMessage(JSON.stringify(["init", grid_width, grid_height, _createGrid(grid_width, grid_height)]));
 
@@ -51,19 +63,19 @@ this.GOF = (function (graphics)
 	{
 		var msg = JSON.parse(ev.data);
 
-		console.log(msg);
+		//console.log(msg);
+
+		if (msg.content && msg.content.grid) {
+			//graphics.update(msg.content.grid);
+		}
 
 		if (msg.title === "ready") {
-			graphics.update(msg.content.grid);
-			console.profileEnd();
-		} else if (msg.title === "start") {
-			phy.postMessage(JSON.stringify(["start", onstep, nr_thread]));
-		} else if (msg.title === "step") {
-			// TODO
-		} else if (msg.title === "stop") {
-			// TODO
+		} else if (msg.title === "started") {
+		} else if (msg.title === "stepped") {
+			nr_steps++;
+			ui.nr_steps.textContent = nr_steps;
+		} else if (msg.title === "stopped") {
 		} else if (msg.title === "log") {
-			console.log(msg.content);
 		}
 	};
 

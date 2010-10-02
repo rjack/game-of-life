@@ -13,6 +13,11 @@ var grids,
 
 	_loop = function (notify)
 	{
+		/*
+		 * XXX
+		 * worker is blocking the UI and does not respond to GOF.stop, making
+		 * this an endless loop.
+		 */
 		while (running) {
 			_step(notify);
 		}
@@ -102,6 +107,7 @@ iface.stop = function ()
 		clearInterval(running);
 	}
 	running = false;
+	postMessage(JSON.stringify({title: "stopped", content: {grid: grids[current]}}));
 };
 
 
