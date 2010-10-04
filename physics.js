@@ -1,121 +1,65 @@
-var grids,
-	current,
-	width, height,
-	running,
-	iface = {},
+importScripts("grid.js");
 
-	_step = function (notify)
+
+var iface = {},
+
+	_sum = function (x, y)
 	{
-		if (notify) {
-			postMessage(JSON.stringify({title: "stepped", content: {grid: grids[current]}}));
-		}
+		return x + y;
 	},
 
-	_loop = function (notify)
+	_evolve = function (cell, neighbours)
 	{
-		/*
-		 * XXX
-		 * worker is blocking the UI and does not respond to GOF.stop, making
-		 * this an endless loop.
-		 */
-		while (running) {
-			_step(notify);
-		}
-	};
-
-
-/*
- * Allocates the grid.
- */
-iface.init = function (grid_width, grid_height, matrix)
-{
-	var i, j, k;
-
-	width = grid_width;
-	height = grid_height;
-
-	grids = [[], []];
-
-	for (i = 0; i < grids.length; i++) {
-		for (j = 0; j < grid_width; j++) {
-			grids[i][j] = [];
-			for (k = 0; k < grid_height; k++) {
-				grids[i][j][k] = matrix[j][k];
+		var nr_alive = neighbours.reduce(_sum);
+		if (cell) {
+			if (nr_alive < 2 || nr_alive > 3) {
+				return false;
+			} else {
+				return true;
+			}
+		} else {
+			if (nr_alive === 3) {
+				return true;
+			} else {
+				return false;
 			}
 		}
-	}
+	};
 
-	current = 0;
-	running = false;
 
-	return {
+iface.init = function (width, height, matrix)
+{
+	GRID.init(width, height, matrix);
+	postMessage(JSON.stringify({
 		title: "ready",
 		content: {
-			grid: grids[current]
+			grid: GRID.getGrid()
+		}
+	}));
+};
+
+
+/*
+ * compute the next grid configuration
+ */
+iface.next = function ()
+{
+	var i, j, grid = GRID.getGrid();
+
+	for (i = 0; i < GRID.getWidth(); i++) {
+		for (j = 0; j < GRID.getHeight(); j++) {
+			GRID.setGrid(i, j, _evolve(GRID.cell(i, j, 0, 0), GRID.neighbours(i, j)), true);
+		}
+	}
+
+	GRID.swap();
+
+	return {
+		title: "stepped",
+		content: {
+			grid: GRID.getGrid()
 		}
 	};
-};
-
-
-/*
- * start: starts the simulation.
- *
- * - interval: time in milliseconds between steps. If it's zero simulation
- *   runs in a tight loop.
- *
- * - notify: notify steps
- *
- * - nr_thread: number of additional web workers to use. If it's zero, use
- *   just this one.
- */
-iface.start = function (interval, notify, nr_thread)
-{
-	interval = Number(interval);
-	nr_thread = Number(nr_thread);
-
-	// NaN
-	if (interval !== interval) {
-		throw "interval is not a number"
-	}
-	if (nr_thread !== nr_thread) {
-		throw "nr_thread is not a number"
-	}
-
-	// Tell we're going...
-	postMessage(JSON.stringify({title: "started", content: null}));
-
-	// ... and go!
-	if (interval === 0) {
-		running = true;
-		_loop(notify)
-	} else {
-		running = setInterval(function()
-		{
-			_step(notify);
-		}, 1000 / interval);
-	}
-
-};
-
-
-/*
- * stop: stops the simulation.
- */
-iface.stop = function ()
-{
-	if (typeof running === "number") {
-		clearInterval(running);
-	}
-	running = false;
-	postMessage(JSON.stringify({title: "stopped", content: {grid: grids[current]}}));
-};
-
-
-/*
- * step: advances the simulation just one step.
- */
-iface.step = function ()
-{
 };
 
 
@@ -127,7 +71,7 @@ onmessage = function (ev)
 	if (request[0] in iface) {
 		result = iface[request[0]].apply(this, request.slice(1));
 	} else {
-		throw msg.fn + " not in interface.";
+		throw request[0] + " not in interface.";
 	}
 
 	if (typeof result !== "undefined") {

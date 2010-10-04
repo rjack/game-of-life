@@ -1,10 +1,11 @@
-this.GOF = (function (graphics)
+this.GOL = (function (graphics)
 {
 	var iface = {},
-		nr_steps,
-		phy = new Worker("physics.js"),
+		_running,
+		_nr_steps,
+		_phy = new Worker("physics.js"),
 
-		ui = (function (elems)
+		_ui = (function (elems)
 		{
 			var i, ui = {};
 			for (i = 0; i < elems.length; i++) {
@@ -19,19 +20,21 @@ this.GOF = (function (graphics)
 			for (i = 0; i < width; i++) {
 				grid[i] = [];
 				for (j = 0; j < height; j++) {
-					grid[i][j] = (Math.random() >= 0.5);
+					grid[i][j] = Math.random() >= 0.5 ? true : false;
 				}
 			}
 			return grid;
 		};
 
+
 	iface.init = function (grid_width, grid_height, cell_width, cell_height)
 	{
-		nr_steps = 0;
-		ui.nr_steps.textContent = nr_steps;
+		_nr_steps = 0;
+		_running = false;
+		_ui.nr_steps.textContent = _nr_steps;
 
 		// init physics worker
-		phy.postMessage(JSON.stringify(["init", grid_width, grid_height, _createGrid(grid_width, grid_height)]));
+		_phy.postMessage(JSON.stringify(["init", grid_width, grid_height, _createGrid(grid_width, grid_height)]));
 
 		// init graphics module
 		graphics.init({
@@ -47,33 +50,47 @@ this.GOF = (function (graphics)
 		});
 	};
 
-	iface.start = function (interval, onstep, nr_thread)
+
+	iface.start = function ()
 	{
-		phy.postMessage(JSON.stringify(["start", interval, onstep, nr_thread]));
+		console.profile();
+		_running = true;
+		_phy.postMessage(JSON.stringify(["next"]));
+	};
+
+
+	iface.step = function ()
+	{
+		_running = false;
+		_phy.postMessage(JSON.stringify(["next"]));
 	};
 
 
 	iface.stop = function ()
 	{
-		phy.postMessage(JSON.stringify(["stop"]));
+		_running = false;
+		console.profileEnd();
 	};
 
 
-	phy.onmessage = function (ev)
+	_phy.onmessage = function (ev)
 	{
 		var msg = JSON.parse(ev.data);
 
 		//console.log(msg);
 
 		if (msg.content && msg.content.grid) {
-			//graphics.update(msg.content.grid);
+			graphics.update(msg.content.grid);
 		}
 
 		if (msg.title === "ready") {
 		} else if (msg.title === "started") {
 		} else if (msg.title === "stepped") {
-			nr_steps++;
-			ui.nr_steps.textContent = nr_steps;
+			_nr_steps++;
+			_ui.nr_steps.textContent = _nr_steps;
+			if (_running) {
+				_phy.postMessage(JSON.stringify(["next"]));
+			}
 		} else if (msg.title === "stopped") {
 		} else if (msg.title === "log") {
 		}
