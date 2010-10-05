@@ -53,7 +53,9 @@ this.GOL = (function (graphics)
 
 	iface.start = function ()
 	{
-		console.profile();
+		if (console.profile) {
+			console.profile();
+		}
 		_running = true;
 		_phy.postMessage(JSON.stringify(["next"]));
 	};
@@ -69,7 +71,9 @@ this.GOL = (function (graphics)
 	iface.stop = function ()
 	{
 		_running = false;
-		console.profileEnd();
+		if (console.profileEnd) {
+			console.profileEnd();
+		}
 	};
 
 
