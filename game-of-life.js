@@ -2,6 +2,7 @@ this.GOL = (function (graphics, physics)
 {
 	var iface = {},
 		_running,
+		_profiling,
 		_nr_steps,
 
 		_ui = (function (elems)
@@ -61,7 +62,8 @@ this.GOL = (function (graphics, physics)
 
 	iface.start = function ()
 	{
-		if (console.profile) {
+		if (console.profile && location.hash === "#profile") {
+			_profiling = true;
 			console.profile();
 		}
 
@@ -85,7 +87,7 @@ this.GOL = (function (graphics, physics)
 			clearInterval(_running);
 			_running = null;
 		}
-		if (console.profileEnd) {
+		if (_profiling) {
 			console.profileEnd();
 		}
 	};
