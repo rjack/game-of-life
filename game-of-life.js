@@ -1,9 +1,8 @@
-this.GOL = (function (graphics)
+this.GOL = (function (graphics, physics)
 {
 	var iface = {},
 		_running,
 		_nr_steps,
-		_phy = new Worker("physics.js"),
 
 		_ui = (function (elems)
 		{
@@ -24,17 +23,24 @@ this.GOL = (function (graphics)
 				}
 			}
 			return grid;
+		},
+
+		_loop = function ()
+		{
+			var result = physics.next();
+			graphics.update(result.content.grid);
 		};
 
 
 	iface.init = function (grid_width, grid_height, cell_width, cell_height)
 	{
+		var grid = _createGrid(grid_width, grid_height);
 		_nr_steps = 0;
-		_running = false;
+		_running = null;
 		_ui.nr_steps.textContent = _nr_steps;
 
 		// init physics worker
-		_phy.postMessage(JSON.stringify(["init", grid_width, grid_height, _createGrid(grid_width, grid_height)]));
+		physics.init(grid_width, grid_height, grid);
 
 		// init graphics module
 		graphics.init({
@@ -48,6 +54,8 @@ this.GOL = (function (graphics)
 				height: cell_height
 			}
 		});
+
+		graphics.update(grid);
 	};
 
 
@@ -56,49 +64,31 @@ this.GOL = (function (graphics)
 		if (console.profile) {
 			console.profile();
 		}
-		_running = true;
-		_phy.postMessage(JSON.stringify(["next"]));
+
+		_running = setInterval(_loop, 0);
 	};
 
 
 	iface.step = function ()
 	{
-		_running = false;
-		_phy.postMessage(JSON.stringify(["next"]));
+		if (_running !== null) {
+			clearInterval(_running);
+			_running = null;
+		}
+		setTimeout(_loop, 0);
 	};
 
 
 	iface.stop = function ()
 	{
-		_running = false;
+		if (_running !== null) {
+			clearInterval(_running);
+			_running = null;
+		}
 		if (console.profileEnd) {
 			console.profileEnd();
 		}
 	};
 
-
-	_phy.onmessage = function (ev)
-	{
-		var msg = JSON.parse(ev.data);
-
-		//console.log(msg);
-
-		if (msg.content && msg.content.grid) {
-			graphics.update(msg.content.grid);
-		}
-
-		if (msg.title === "ready") {
-		} else if (msg.title === "started") {
-		} else if (msg.title === "stepped") {
-			_nr_steps++;
-			_ui.nr_steps.textContent = _nr_steps;
-			if (_running) {
-				_phy.postMessage(JSON.stringify(["next"]));
-			}
-		} else if (msg.title === "stopped") {
-		} else if (msg.title === "log") {
-		}
-	};
-
 	return iface;
-}(GRAPHICS));
+}(GRAPHICS, PHYSICS));
