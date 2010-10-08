@@ -1,7 +1,63 @@
-this.GOL = (function (graphics, physics)
+/*
+ * Task: monitoring FPS
+ *
+ * tstamp_before_frame = Date()
+ * _loop
+ * tstamp_after_frame = Date()
+ * frameDrawingTime = tstamp_after_frame - tstamp_before_frame
+ * average = frameDrawingTime * 0.8 + previousFrameDrawingTime * 0.2
+ */
+
+this.WAVERAGE = (function ()
+{
+	var _tstamp = {
+			before: null,
+			now: null
+		},
+		_average,
+		iface = {};
+
+
+	iface.start = function ()
+	{
+		_tstamp.before = new Date();
+		_average = null;
+	};
+
+
+	iface.take = function ()
+	{
+		var time_taken;
+
+		_tstamp.now = new Date();
+		time_taken = _tstamp.now - _tstamp.before;
+		if (typeof _average !== "number") {
+			_average = time_taken;
+		} else {
+			_average = time_taken * 0.8 + _average * 0.2;
+		}
+		_tstamp.before = _tstamp.now;
+
+		return _average;
+	};
+
+
+	iface.getAverage = function ()
+	{
+		return _average;
+	};
+
+	return iface;
+}());
+
+
+this.GOL = (function (graphics, physics, waverage)
 {
 	var iface = {},
-		_running,
+		_interval = {
+			redraw: null,
+			fps: null
+		},
 		_profiling,
 		_nr_steps,
 
@@ -30,6 +86,7 @@ this.GOL = (function (graphics, physics)
 		{
 			var result = physics.next();
 			graphics.update(result.content.grid);
+			waverage.take();
 		};
 
 
@@ -37,7 +94,8 @@ this.GOL = (function (graphics, physics)
 	{
 		var grid = _createGrid(grid_width, grid_height);
 		_nr_steps = 0;
-		_running = null;
+		_interval.redraw = null;
+		_interval.fps = null;
 		_ui.nr_steps.textContent = _nr_steps;
 
 		// init physics worker
@@ -67,15 +125,20 @@ this.GOL = (function (graphics, physics)
 			console.profile();
 		}
 
-		_running = setInterval(_loop, 0);
+		waverage.start();
+		_interval.redraw = setInterval(_loop, 0);
+		_interval.fps = setInterval(function ()
+		{
+			document.title = "FPS: " + (1000 / waverage.getAverage());
+		}, 1000);
 	};
 
 
 	iface.step = function ()
 	{
-		if (_running !== null) {
-			clearInterval(_running);
-			_running = null;
+		if (_interval.redraw !== null) {
+			clearInterval(_interval.redraw);
+			_interval.redraw = null;
 		}
 		setTimeout(_loop, 0);
 	};
@@ -83,9 +146,9 @@ this.GOL = (function (graphics, physics)
 
 	iface.stop = function ()
 	{
-		if (_running !== null) {
-			clearInterval(_running);
-			_running = null;
+		if (_interval.redraw !== null) {
+			clearInterval(_interval.redraw);
+			_interval.redraw = null;
 		}
 		if (_profiling) {
 			console.profileEnd();
@@ -93,4 +156,4 @@ this.GOL = (function (graphics, physics)
 	};
 
 	return iface;
-}(GRAPHICS, PHYSICS));
+}(GRAPHICS, PHYSICS, WAVERAGE));
