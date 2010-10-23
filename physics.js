@@ -1,6 +1,6 @@
 this.PHYSICS = (function (grid)
 {
-	var iface = {},
+	var my = {},
 
 		_evolve = function (cell, neighbours)
 		{
@@ -25,7 +25,7 @@ this.PHYSICS = (function (grid)
 		};
 
 
-	iface.init = function (width, height, matrix)
+	my.init = function (width, height, matrix)
 	{
 		grid.init(width, height, matrix);
 		return {
@@ -40,7 +40,7 @@ this.PHYSICS = (function (grid)
 	/*
 	 * compute the next grid configuration
 	 */
-	iface.next = function ()
+	my.next = function ()
 	{
 		var i, j;
 
@@ -60,5 +60,5 @@ this.PHYSICS = (function (grid)
 		};
 	};
 
-	return iface;
+	return my;
 }(GRID));

@@ -15,17 +15,17 @@ this.WAVERAGE = (function ()
 			now: null
 		},
 		_average,
-		iface = {};
+		my = {};
 
 
-	iface.start = function ()
+	my.start = function ()
 	{
 		_tstamp.before = new Date();
 		_average = null;
 	};
 
 
-	iface.take = function ()
+	my.take = function ()
 	{
 		var time_taken;
 
@@ -42,18 +42,18 @@ this.WAVERAGE = (function ()
 	};
 
 
-	iface.getAverage = function ()
+	my.getAverage = function ()
 	{
 		return _average;
 	};
 
-	return iface;
+	return my;
 }());
 
 
 this.GOL = (function (graphics, physics, waverage)
 {
-	var iface = {},
+	var my = {},
 		_interval = {
 			redraw: null,
 			fps: null
@@ -90,7 +90,7 @@ this.GOL = (function (graphics, physics, waverage)
 		};
 
 
-	iface.init = function (grid_width, grid_height, cell_width, cell_height)
+	my.init = function (grid_width, grid_height, cell_width, cell_height)
 	{
 		var grid = _createGrid(grid_width, grid_height);
 		_nr_steps = 0;
@@ -118,7 +118,7 @@ this.GOL = (function (graphics, physics, waverage)
 	};
 
 
-	iface.start = function ()
+	my.start = function ()
 	{
 		if (console.profile && location.hash === "#profile") {
 			_profiling = true;
@@ -134,7 +134,7 @@ this.GOL = (function (graphics, physics, waverage)
 	};
 
 
-	iface.step = function ()
+	my.step = function ()
 	{
 		if (_interval.redraw !== null) {
 			clearInterval(_interval.redraw);
@@ -144,7 +144,7 @@ this.GOL = (function (graphics, physics, waverage)
 	};
 
 
-	iface.stop = function ()
+	my.stop = function ()
 	{
 		if (_interval.redraw !== null) {
 			clearInterval(_interval.redraw);
@@ -155,5 +155,5 @@ this.GOL = (function (graphics, physics, waverage)
 		}
 	};
 
-	return iface;
+	return my;
 }(GRAPHICS, PHYSICS, WAVERAGE));

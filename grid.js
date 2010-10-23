@@ -11,10 +11,10 @@ this.GRID = (function ()
 			[-1, +1], [+0, +1], [+1, +1]
 		],
 
-		iface = {};
+		my = {};
 
 
-	iface.init = function (grid_width, grid_height, matrix)
+	my.init = function (grid_width, grid_height, matrix)
 	{
 		var i, j, k;
 
@@ -36,13 +36,13 @@ this.GRID = (function ()
 	};
 
 
-	iface.swap = function ()
+	my.swap = function ()
 	{
 		_current = 1 - _current;
 	};
 
 
-	iface.cell = function (i, j, i_off, j_off)
+	my.cell = function (i, j, i_off, j_off)
 	{
 		var new_i = (i + i_off + _width) % _width,
 			new_j = (j + j_off + _height) % _height;
@@ -51,24 +51,24 @@ this.GRID = (function ()
 	};
 
 
-	iface.neighbours = function (i, j)
+	my.neighbours = function (i, j)
 	{
 		var n, neighbs = [];
 
 		for (n = 0; n < _ngb_off.length; n++) {
-			neighbs.push(iface.cell(i, j, _ngb_off[n][0], _ngb_off[n][1]));
+			neighbs.push(my.cell(i, j, _ngb_off[n][0], _ngb_off[n][1]));
 		}
 		return neighbs;
 	};
 
 
-	iface.getGrid = function ()
+	my.getGrid = function ()
 	{
 		return _grids[_current];
 	};
 
 
-	iface.setGrid = function (i, j, value, future)
+	my.setGrid = function (i, j, value, future)
 	{
 		var which = _current;
 
@@ -80,17 +80,17 @@ this.GRID = (function ()
 	};
 
 
-	iface.getWidth = function ()
+	my.getWidth = function ()
 	{
 		return _width;
 	};
 
 
-	iface.getHeight = function ()
+	my.getHeight = function ()
 	{
 		return _height;
 	};
 
 
-	return iface;
+	return my;
 }());
