@@ -1,57 +1,4 @@
-/*
- * Task: monitoring FPS
- *
- * tstamp_before_frame = Date()
- * _loop
- * tstamp_after_frame = Date()
- * frameDrawingTime = tstamp_after_frame - tstamp_before_frame
- * average = frameDrawingTime * 0.8 + previousFrameDrawingTime * 0.2
- */
-
-this.WAVERAGE = (function ()
-{
-	var _tstamp = {
-			before: null,
-			now: null
-		},
-		_average,
-		my = {};
-
-
-	my.start = function ()
-	{
-		_tstamp.before = new Date();
-		_average = null;
-	};
-
-
-	my.take = function ()
-	{
-		var time_taken;
-
-		_tstamp.now = new Date();
-		time_taken = _tstamp.now - _tstamp.before;
-		if (typeof _average !== "number") {
-			_average = time_taken;
-		} else {
-			_average = time_taken * 0.8 + _average * 0.2;
-		}
-		_tstamp.before = _tstamp.now;
-
-		return _average;
-	};
-
-
-	my.getAverage = function ()
-	{
-		return _average;
-	};
-
-	return my;
-}());
-
-
-this.GOL = (function (graphics, physics, waverage)
+this.GOL = (function (graphics, physics, jsmeasure)
 {
 	var my = {},
 		_interval = {
@@ -60,6 +7,11 @@ this.GOL = (function (graphics, physics, waverage)
 		},
 		_profiling,
 		_nr_steps,
+
+		_measures = {
+			fps_wmean: null,
+			stopwatch: null
+		},
 
 		_ui = (function (elems)
 		{
@@ -86,7 +38,8 @@ this.GOL = (function (graphics, physics, waverage)
 		{
 			var result = physics.next();
 			graphics.update(result.content.grid);
-			waverage.take();
+			_measures.fps_wmean.add(_measures.stopwatch.read());
+			_measures.stopwatch.reset();
 		};
 
 
@@ -115,6 +68,9 @@ this.GOL = (function (graphics, physics, waverage)
 		});
 
 		graphics.update(grid);
+
+		_measures.stopwatch = jsmeasure.create_stopwatch();
+		_measures.fps_wmean = jsmeasure.create_weighted_mean(0.8, 0.2);
 	};
 
 
@@ -125,11 +81,12 @@ this.GOL = (function (graphics, physics, waverage)
 			console.profile();
 		}
 
-		waverage.start();
+		_measures.stopwatch.reset();
+
 		_interval.redraw = setInterval(_loop, 0);
 		_interval.fps = setInterval(function ()
 		{
-			document.title = "FPS: " + (1000 / waverage.getAverage());
+			document.title = "FPS: " + (1000 / _measures.fps_wmean.read());
 		}, 1000);
 	};
 
@@ -156,4 +113,4 @@ this.GOL = (function (graphics, physics, waverage)
 	};
 
 	return my;
-}(GRAPHICS, PHYSICS, WAVERAGE));
+}(GRAPHICS, PHYSICS, JSMEASURE));
