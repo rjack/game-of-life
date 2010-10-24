@@ -6,7 +6,7 @@
 
 this.GRAPHICS = (function ()
 {
-	var cnv, ctx,
+	var cnv, ctx, img, pixels, pixels_length,
 
 		cell = {
 			width: 0,
@@ -22,22 +22,34 @@ this.GRAPHICS = (function ()
 			ctx = cnv.getContext("2d");
 			cell.width = config.cell.width;
 			cell.height = config.cell.height;
-			ctx.fillStyle = "black";
+			img = ctx.getImageData(0, 0, cnv.width, cnv.height);
+			pixels = img.data;
+			pixels_length = img.data.length;
+
 		},
 
 
 		update = function (grid)
 		{
-			var i_width, i_height;
+			var p, i, j;
 
-			ctx.clearRect(0, 0, cnv.width, cnv.height);
-			for (i_width = 0; i_width < grid.length; i_width++) {
-				for (i_height = 0; i_height < grid[i_width].length; i_height++) {
-					if (grid[i_width][i_height]) {
-						ctx.fillRect(i_width * cell.width, i_height * cell.height, cell.width, cell.height);
-					}
+			for (p = 0; p < pixels_length; p += 4) {
+				i = (p / 4) % cnv.width;
+				j = Math.floor((p / 4) / cnv.height);
+				if (grid[i][j]) {
+					pixels[p + 0] = 0;
+					pixels[p + 1] = 0;
+					pixels[p + 2] = 0;
+					pixels[p + 3] = 255;
+				} else {
+					pixels[p + 0] = 255;
+					pixels[p + 1] = 255;
+					pixels[p + 2] = 255;
+					pixels[p + 3] = 255;
 				}
 			}
+			img.data = pixels;
+			ctx.putImageData(img, 0, 0);
 		};
 
 
