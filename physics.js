@@ -2,21 +2,16 @@ this.PHYSICS = (function (grid)
 {
 	var my = {},
 
-		_evolve = function (cell, neighbours)
+		_evolve = function (cell, nr_neighbours)
 		{
-			var i, nr_alive = 0;
-
-			for (i = 0; i < neighbours.length; i++) {
-				nr_alive += neighbours[i];
-			}
 			if (cell) {
-				if (nr_alive < 2 || nr_alive > 3) {
+				if (nr_neighbours < 2 || nr_neighbours > 3) {
 					return false;
 				} else {
 					return true;
 				}
 			} else {
-				if (nr_alive === 3) {
+				if (nr_neighbours === 3) {
 					return true;
 				} else {
 					return false;
@@ -46,7 +41,7 @@ this.PHYSICS = (function (grid)
 
 		for (i = 0; i < grid.getWidth(); i++) {
 			for (j = 0; j < grid.getHeight(); j++) {
-				grid.setGrid(i, j, _evolve(grid.cell(i, j, 0, 0), grid.neighbours(i, j)), true);
+				grid.setGrid(i, j, _evolve(grid.cell(i, j, 0, 0), grid.nr_neighbours(i, j)), true);
 			}
 		}
 

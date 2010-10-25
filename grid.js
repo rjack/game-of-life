@@ -51,14 +51,16 @@ this.GRID = (function ()
 	};
 
 
-	my.neighbours = function (i, j)
+	my.nr_neighbours = function (i, j)
 	{
-		var n, neighbs = [];
+		var n, num = 0;
 
 		for (n = 0; n < _ngb_off.length; n++) {
-			neighbs.push(my.cell(i, j, _ngb_off[n][0], _ngb_off[n][1]));
+			if (my.cell(i, j, _ngb_off[n][0], _ngb_off[n][1])) {
+				num++;
+			}
 		}
-		return neighbs;
+		return num;
 	};
 
 
