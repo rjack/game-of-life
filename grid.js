@@ -1,96 +1,144 @@
 this.GRID = (function ()
 {
-	var _grids,
-		_current,
-		_width, _height,
+	var cells,
+		cells_tmp,
+		width, height,
+		nr_cells,
 
-		// neighbours offsets
-		_ngb_off = [
-			[-1, -1], [+0, -1], [+1, -1],
-			[-1, +0],           [+1, +0],
-			[-1, +1], [+0, +1], [+1, +1]
-		],
+		encode_cell_status = function (alive, nr_alive_neighbours)
+		{
+			return alive ? nr_alive_neighbours : nr_alive_neighbours + 9;
+		},
+
+		is_cell_alive = function (encoded_status)
+		{
+			return encoded_status < 9;
+		},
+
+		cell_nr_neighbours = function (encoded_status)
+		{
+			return encoded_status < 9 ? encoded_status : encoded_status - 9;
+		},
+
+		toggle_status = function (encoded_status)
+		{
+			return encoded_status < 9 ? encoded_status + 9 : encoded_status - 9;
+		},
+
+		notify_neighbours = function (cells, i, alive)
+		{
+			var inc = -1,
+				top_left = (i - 1 - width + nr_cells) % nr_cells,
+				top = (i - width + nr_cells) % nr_cells,
+				top_right = (i + 1 - width + nr_cells) % nr_cells,
+				left = (i - 1 + nr_cells) % nr_cells,
+				right = (i + 1) % nr_cells,
+				bottom_left = (i - 1 + width) % nr_cells,
+				bottom = (i + width) % nr_cells,
+				bottom_right = (i + 1 + width) % nr_cells;
+
+
+			if (alive) {
+				inc = 1;
+			}
+
+			cells[top_left] += inc;
+			cells[top] += inc;
+			cells[top_right] += inc;
+
+			cells[left] += inc;
+			cells[right] += inc;
+
+			cells[bottom_left] += inc;
+			cells[bottom] += inc;
+			cells[bottom_right] += inc;
+		},
 
 		my = {};
 
 
-	my.init = function (grid_width, grid_height, matrix)
+	my.init = function (grid_width, grid_height)
 	{
-		var i, j, k;
+		var i;
 
-		_width = grid_width;
-		_height = grid_height;
+		// Module vars initialization
+		width = grid_width;
+		height = grid_height;
+		nr_cells = width * height;
+		cells = [];
+		cells_tmp = [];
 
-		_grids = [[], []];
+		// Initialize cells: all dead (thus zero alive neighbours).
+		for (i = 0; i < nr_cells; i++) {
+			cells[i] = encode_cell_status(false, 0);
+			// ASSUMPTION: pre-allocating the temp array here will save some
+			// time on the computation of the first generation
+			// TODO: verify
+			cells_tmp[i] = false;
+		}
+	};
 
-		for (i = 0; i < _grids.length; i++) {
-			for (j = 0; j < grid_width; j++) {
-				_grids[i][j] = [];
-				for (k = 0; k < grid_height; k++) {
-					_grids[i][j][k] = matrix[j][k];
+
+	my.next = function ()
+	{
+		var i, nr_neighbours, cells_swap;
+
+		for (i = 0; i < nr_cells; i++) {
+			cells_tmp[i] = cells[i];
+		}
+
+		for (i = 0; i < nr_cells; i++) {
+			nr_neighbours = cell_nr_neighbours(cells[i]);
+			if (is_cell_alive(cells[i])) {
+				if (nr_neighbours < 2 || nr_neighbours > 3) {
+					cells_tmp[i] = toggle_status(cells_tmp[i]);
+					notify_neighbours(cells_tmp, i, false);
 				}
+			} else if (nr_neighbours === 3) {
+				cells_tmp[i] = toggle_status(cells_tmp[i]);
+				notify_neighbours(cells_tmp, i, true);
 			}
 		}
+		cells_swap = cells;
+		cells = cells_tmp;
+		cells_tmp = cells_swap;
 
-		_current = 0;
+		return cells;
 	};
 
 
-	my.swap = function ()
+	my.cell = function (i, j)
 	{
-		_current = 1 - _current;
+		return cells[i + (width * j)];
 	};
 
 
-	my.cell = function (i, j, i_off, j_off)
+	my.getCells = function ()
 	{
-		var new_i = (i + i_off + _width) % _width,
-			new_j = (j + j_off + _height) % _height;
-
-		return _grids[_current][new_i][new_j];
-	};
-
-
-	my.nr_neighbours = function (i, j)
-	{
-		var n, num = 0;
-
-		for (n = 0; n < _ngb_off.length; n++) {
-			if (my.cell(i, j, _ngb_off[n][0], _ngb_off[n][1])) {
-				num++;
-			}
-		}
-		return num;
-	};
-
-
-	my.getGrid = function ()
-	{
-		return _grids[_current];
-	};
-
-
-	my.setGrid = function (i, j, value, future)
-	{
-		var which = _current;
-
-		if (future) {
-			which = 1 - _current;
-		}
-
-		_grids[which][i][j] = value;
+		return cells;
 	};
 
 
 	my.getWidth = function ()
 	{
-		return _width;
+		return width;
 	};
 
 
 	my.getHeight = function ()
 	{
-		return _height;
+		return height;
+	};
+
+
+	my.set = function (i, alive)
+	{
+		var alive_now = is_cell_alive(cells[i]);
+
+		if (alive && !alive_now || !alive && alive_now) {
+			cells[i] = toggle_status(cells[i]);
+			notify_neighbours(cells, i, alive);
+		}
 	};
 
 

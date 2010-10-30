@@ -1,4 +1,4 @@
-this.GOL = (function (graphics, physics, jsmeasure)
+this.GOL = (function (graphics, grid, jsmeasure)
 {
 	var my = {},
 		_interval = {
@@ -22,22 +22,9 @@ this.GOL = (function (graphics, physics, jsmeasure)
 			return ui;
 		}(["nr_steps"])),
 
-		_createGrid = function (width, height)
-		{
-			var i, j, grid = [];
-			for (i = 0; i < width; i++) {
-				grid[i] = [];
-				for (j = 0; j < height; j++) {
-					grid[i][j] = Math.random() >= 0.5 ? true : false;
-				}
-			}
-			return grid;
-		},
-
 		_loop = function ()
 		{
-			var result = physics.next();
-			graphics.update(result.content.grid);
+			graphics.update(grid.next());
 			_measures.fps_wmean.add(_measures.stopwatch.read());
 			_measures.stopwatch.reset();
 		};
@@ -45,14 +32,12 @@ this.GOL = (function (graphics, physics, jsmeasure)
 
 	my.init = function (grid_width, grid_height, cell_width, cell_height)
 	{
-		var grid = _createGrid(grid_width, grid_height);
+		var i;
+
 		_nr_steps = 0;
 		_interval.redraw = null;
 		_interval.fps = null;
 		_ui.nr_steps.textContent = _nr_steps;
-
-		// init physics worker
-		physics.init(grid_width, grid_height, grid);
 
 		// init graphics module
 		graphics.init({
@@ -67,7 +52,11 @@ this.GOL = (function (graphics, physics, jsmeasure)
 			}
 		});
 
-		graphics.update(grid);
+		grid.init(grid_width, grid_height);
+		for (i = 0; i < grid_width * grid_height; i++) {
+			grid.set(i, Math.random() > 0.5);
+		}
+		graphics.update(grid.getCells());
 
 		_measures.stopwatch = jsmeasure.create_stopwatch();
 		_measures.fps_wmean = jsmeasure.create_weighted_mean(0.8, 0.2);
@@ -113,4 +102,4 @@ this.GOL = (function (graphics, physics, jsmeasure)
 	};
 
 	return my;
-}(GRAPHICS, PHYSICS, JSMEASURE));
+}(GRAPHICS, GRID, JSMEASURE));

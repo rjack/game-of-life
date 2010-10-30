@@ -29,14 +29,13 @@ this.GRAPHICS = (function ()
 		},
 
 
-		update = function (grid)
+		update = function (cells)
 		{
 			var p, i, j;
 
 			for (p = 0; p < pixels_length; p += 4) {
-				i = (p / 4) % cnv.width;
-				j = Math.floor((p / 4) / cnv.height);
-				if (grid[i][j]) {
+				i = (p / 4);
+				if (cells[i] < 9) {
 					pixels[p + 0] = 0;
 					pixels[p + 1] = 0;
 					pixels[p + 2] = 0;
