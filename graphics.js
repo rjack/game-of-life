@@ -6,7 +6,7 @@
 
 this.GRAPHICS = (function ()
 {
-	var cnv, ctx, img, pixels, pixels_length,
+	var cnv, ctx,
 
 		cell = {
 			width: 0,
@@ -22,18 +22,16 @@ this.GRAPHICS = (function ()
 			ctx = cnv.getContext("2d");
 			cell.width = config.cell.width;
 			cell.height = config.cell.height;
-			img = ctx.getImageData(0, 0, cnv.width, cnv.height);
-			pixels = img.data;
-			pixels_length = img.data.length;
-
 		},
 
 
-		update = function (cells)
+		draw = function (cells)
 		{
-			var p, i, j;
+			var i, p,
+				img = ctx.getImageData(0, 0, cnv.width, cnv.height),
+				pixels = img.data;
 
-			for (p = 0; p < pixels_length; p += 4) {
+			for (p = 0; p < pixels.length; p += 4) {
 				i = (p / 4);
 				if (cells[i] < 9) {
 					pixels[p + 0] = 0;
@@ -49,12 +47,39 @@ this.GRAPHICS = (function ()
 			}
 			img.data = pixels;
 			ctx.putImageData(img, 0, 0);
+		},
+
+
+
+		update = function (changed)
+		{
+			var i, c,
+				img = ctx.getImageData(0, 0, cnv.width, cnv.height),
+				pixels = img.data;
+
+			for (i = 0; i < changed.alive.length; i++) {
+				c = 4 * changed.alive[i];
+				pixels[c + 0] = 0;
+				pixels[c + 1] = 0;
+				pixels[c + 2] = 0;
+				pixels[c + 3] = 255;
+			}
+			for (i = 0; i < changed.dead.length; i++) {
+				c = 4 * changed.dead[i];
+				pixels[c + 0] = 255;
+				pixels[c + 1] = 255;
+				pixels[c + 2] = 255;
+				pixels[c + 3] = 255;
+			}
+			img.data = pixels;
+			ctx.putImageData(img, 0, 0);
 		};
 
 
 	// GRAPHICS's public interface
 	return {
 		init: init,
-		update: update
+		update: update,
+		draw: draw
 	};
 }());
