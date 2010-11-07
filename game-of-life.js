@@ -25,12 +25,14 @@ this.GOL = (function (graphics, grid, jsmeasure)
 		_loop = function ()
 		{
 			graphics.update(grid.next());
+			//grid.next();
+			//graphics.draw(grid.getCells());
 			_measures.fps_wmean.add(_measures.stopwatch.read());
 			_measures.stopwatch.reset();
 		};
 
 
-	my.init = function (grid_width, grid_height, cell_width, cell_height)
+	my.init = function (grid_width, grid_height, cell_width, cell_height, alive_cells)
 	{
 		var i;
 
@@ -52,11 +54,20 @@ this.GOL = (function (graphics, grid, jsmeasure)
 			}
 		});
 
+		// init grid module
 		grid.init(grid_width, grid_height);
-		for (i = 0; i < grid_width * grid_height; i++) {
-			grid.set(i, Math.random() > 0.5);
+		if (alive_cells) {
+			// first generation choosen by user
+			for (i = 0; i < alive_cells.length; i++) {
+				grid.set(alive_cells[i], true);
+			}
+		} else {
+			// first generation randomly generated
+			for (i = 0; i < grid_width * grid_height; i++) {
+				grid.set(i, Math.random() > 0.5);
+			}
 		}
-		graphics.update(grid.getCells());
+		graphics.draw(grid.getCells());
 
 		_measures.stopwatch = jsmeasure.create_stopwatch();
 		_measures.fps_wmean = jsmeasure.create_weighted_mean(0.8, 0.2);
