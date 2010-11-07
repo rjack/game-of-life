@@ -81,7 +81,11 @@ this.GRID = (function ()
 
 	my.next = function ()
 	{
-		var i, nr_neighbours, cells_swap;
+		var i, nr_neighbours, cells_swap,
+			changed = {
+				dead: [],
+				alive: []
+			};
 
 		for (i = 0; i < nr_cells; i++) {
 			cells_tmp[i] = cells[i];
@@ -93,17 +97,19 @@ this.GRID = (function ()
 				if (nr_neighbours < 2 || nr_neighbours > 3) {
 					cells_tmp[i] = toggle_status(cells_tmp[i]);
 					notify_neighbours(cells_tmp, i, false);
+					changed.dead.push(i);
 				}
 			} else if (nr_neighbours === 3) {
 				cells_tmp[i] = toggle_status(cells_tmp[i]);
 				notify_neighbours(cells_tmp, i, true);
+				changed.alive.push(i);
 			}
 		}
 		cells_swap = cells;
 		cells = cells_tmp;
 		cells_tmp = cells_swap;
 
-		return cells;
+		return changed;
 	};
 
 
