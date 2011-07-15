@@ -1,3 +1,0 @@
-[submodule "lib/js-measure"]
-	path = lib/js-measure
-	url = git@github.com:rjack/js-measure.git
