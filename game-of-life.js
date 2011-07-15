@@ -1,17 +1,11 @@
-this.GOL = (function (graphics, grid, jsmeasure)
+this.GOL = (function (graphics, grid)
 {
 	var my = {},
 		_interval = {
 			redraw: null,
-			fps: null
 		},
 		_profiling,
 		_nr_steps,
-
-		_measures = {
-			fps_wmean: null,
-			stopwatch: null
-		},
 
 		_ui = (function (elems)
 		{
@@ -27,8 +21,6 @@ this.GOL = (function (graphics, grid, jsmeasure)
 			graphics.update(grid.next());
 			//grid.next();
 			//graphics.draw(grid.getCells());
-			_measures.fps_wmean.add(_measures.stopwatch.read());
-			_measures.stopwatch.reset();
 		};
 
 
@@ -38,7 +30,6 @@ this.GOL = (function (graphics, grid, jsmeasure)
 
 		_nr_steps = 0;
 		_interval.redraw = null;
-		_interval.fps = null;
 		_ui.nr_steps.textContent = _nr_steps;
 
 		// init graphics module
@@ -68,9 +59,6 @@ this.GOL = (function (graphics, grid, jsmeasure)
 			}
 		}
 		graphics.draw(grid.getCells());
-
-		_measures.stopwatch = jsmeasure.create_stopwatch();
-		_measures.fps_wmean = jsmeasure.create_weighted_mean(0.8, 0.2);
 	};
 
 
@@ -81,13 +69,7 @@ this.GOL = (function (graphics, grid, jsmeasure)
 			console.profile();
 		}
 
-		_measures.stopwatch.reset();
-
 		_interval.redraw = setInterval(_loop, 0);
-		_interval.fps = setInterval(function ()
-		{
-			document.title = "FPS: " + (1000 / _measures.fps_wmean.read());
-		}, 1000);
 	};
 
 
@@ -113,4 +95,4 @@ this.GOL = (function (graphics, grid, jsmeasure)
 	};
 
 	return my;
-}(GRAPHICS, GRID, JSMEASURE));
+}(GRAPHICS, GRID));
