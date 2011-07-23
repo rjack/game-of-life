@@ -11,17 +11,48 @@
 	</head>
 
 	<body>
-		<div>
-			<div id="nr_steps"></div>
-			<input type="checkbox" id="profile" value="profile" /> <label for="profiling">Profile</label>
-			<input type="checkbox" id="draw" value="draw" /> <label for="draw">Draw</label>
-			<button id="start-stop">start</button>
-		</div>
+    <div>
+      <input id="width" type="text" value="800">
+      <input id="height" type="text" value="600">
+    </div>
+
+    <div>
+      <button id="start_stop">start</button>
+      <button id="step">step</button>
+    </div>
 
 		<canvas id="canvas"></canvas>
 
 		<script type="text/javascript" src="grid.js"></script>
 		<script type="text/javascript" src="graphics.js"></script>
 		<script type="text/javascript" src="game-of-life.js"></script>
+    <script type="text/javascript">
+      var ui = (function () {
+              var elems = ['start_stop', 'step', 'canvas', 'width', 'height'];
+              var idx;
+              var ui = {};
+
+              for (idx = 0; idx < elems.length; idx++) {
+                  ui[elems[idx]] = document.getElementById(elems[idx]);
+              }
+              return ui;
+          }()),
+          initial_config = null;
+          //initial_config = [1, 802, 1600, 1601, 1602];
+
+      GOL.init(Number(ui.width.value), Number(ui.height.value), 1, 1, initial_config);
+
+      ui.start_stop.addEventListener('click', function (ev) {
+          if (ev.target.textContent === 'start') {
+              // start
+              ev.target.innerHTML = 'stop';
+              GOL.start();
+          } else {
+              // stop
+              ev.target.innerHTML = 'start';
+              GOL.stop();
+          }
+      }, false);
+    </script>
 	</body>
 </html>

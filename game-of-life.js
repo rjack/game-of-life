@@ -2,25 +2,12 @@ this.GOL = (function (graphics, grid)
 {
 	var my = {},
 		_interval = {
-			redraw: null,
+			redraw: null
 		},
-		_profiling,
-		_nr_steps,
-
-		_ui = (function (elems)
-		{
-			var i, ui = {};
-			for (i = 0; i < elems.length; i++) {
-				ui[elems[i]] = document.getElementById(elems[i]);
-			}
-			return ui;
-		}(["nr_steps"])),
 
 		_loop = function ()
 		{
 			graphics.update(grid.next());
-			//grid.next();
-			//graphics.draw(grid.getCells());
 		};
 
 
@@ -28,9 +15,7 @@ this.GOL = (function (graphics, grid)
 	{
 		var i;
 
-		_nr_steps = 0;
 		_interval.redraw = null;
-		_ui.nr_steps.textContent = _nr_steps;
 
 		// init graphics module
 		graphics.init({
@@ -65,7 +50,6 @@ this.GOL = (function (graphics, grid)
 	my.start = function ()
 	{
 		if (console.profile && location.hash === "#profile") {
-			_profiling = true;
 			console.profile();
 		}
 
@@ -88,9 +72,6 @@ this.GOL = (function (graphics, grid)
 		if (_interval.redraw !== null) {
 			clearInterval(_interval.redraw);
 			_interval.redraw = null;
-		}
-		if (_profiling) {
-			console.profileEnd();
 		}
 	};
 
